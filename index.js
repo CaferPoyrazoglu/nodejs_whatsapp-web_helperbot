@@ -1,6 +1,8 @@
 const qrcode = require("qrcode-terminal");
 const fs = require("fs");
+const parse = require("csv-parse");
 const { Client, MessageMedia } = require("whatsapp-web.js");
+require("dotenv/config");
 
 const SESSION_FILE_PATH = "./session.json";
 let sessionCfg;
@@ -22,7 +24,9 @@ client.on("authenticated", (session) => {
 });
 
 client.on("qr", (qr) => {
-  qrcode.generate(qr, { small: true });
+  qrcode.generate(qr, {
+    small: true,
+  });
 });
 
 client.on("ready", () => {
@@ -41,12 +45,52 @@ client.on("message", async (msg) => {
   let chat = await msg.getChat();
 
   if (
-    chat.isGroup &&
+    chat.isGroup /*&&
     msg.body === "Rapor" &&
-    msg.id.remote === "905494032745-1633642858@g.us"
+    msg.id.remote === "905494032745-1633642858@g.us"*/
   ) {
-    const media = MessageMedia.fromFilePath("D://rapor.xlsx");
-    chat.sendMessage(media);
+    var csvData = [];
+    fs.createReadStream(process.env.KAYNAK)
+      .pipe(
+        parse({
+          relaxColumnCount: true,
+          skipEmptyLines: true,
+          skip_lines_with_empty_values: true,
+          skipLinesWithEmptyValues: true,
+        })
+      )
+      .on("data", function (csvrow) {
+        csvData.push(csvrow[1]);
+      })
+      .on("end", function () {
+        //console.log(csvData);
+        client.sendMessage(
+          msg.from,
+          `*DÖNER FIRIN - 1*\r\nÜretilen Klinker Miktarı: ${csvData[1]} ton\r\n
+*DÖNER FIRIN - 2*\r\nÜretilen Klinker Miktarı: ${csvData[2]} ton\r\n\r\n
+*TOPLAM:* ${csvData[3]} ton\r\n`
+        );
+
+        client.sendMessage(
+          msg.from,
+          `*ÇİMENTO DEĞİRMENİ - 1*\r\nÜretilen Çimento Miktarı: ${csvData[5]} ton\r\n
+*ÇİMENTO DEĞİRMENİ - 2*\r\nÜretilen Çimento Miktarı: ${csvData[6]} ton\r\n
+*ÇİMENTO DEĞİRMENİ - 3*\r\nÜretilen Çimento Miktarı: ${csvData[7]} ton\r\n
+*ÇİMENTO DEĞİRMENİ - 4*\r\nÜretilen Çimento Miktarı: ${csvData[8]} ton\r\n
+*ÇİMENTO DEĞİRMENİ - 5*\r\nÜretilen Çimento Miktarı: ${csvData[9]} ton\r\n\r\n
+*TOPLAM:* ${csvData[10]} ton\r\n`
+        );
+
+        client.sendMessage(
+          msg.from,
+          `*ÇİMENTO DEĞİRMENİ - 1*\r\nTüketilen Klinker Miktarı: ${csvData[12]} ton\r\n
+*ÇİMENTO DEĞİRMENİ - 2*\r\nTüketilen Klinker Miktarı: ${csvData[13]} ton\r\n
+*ÇİMENTO DEĞİRMENİ - 3*\r\nTüketilen Klinker Miktarı: ${csvData[14]} ton\r\n
+*ÇİMENTO DEĞİRMENİ - 4*\r\nTüketilen Klinker Miktarı: ${csvData[15]} ton\r\n
+*ÇİMENTO DEĞİRMENİ - 5*\r\nTüketilen Klinker Miktarı: ${csvData[16]} ton\r\n\r\n
+*TOPLAM:* ${csvData[17]} ton\r\n`
+        );
+      });
   }
 });
 
