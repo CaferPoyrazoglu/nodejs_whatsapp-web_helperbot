@@ -45,8 +45,8 @@ client.on("message", async (msg) => {
   let chat = await msg.getChat();
 
   if (
-    chat.isGroup /*&&
-    msg.body === "Rapor" &&
+    chat.isGroup &&
+    msg.body === "Rapor" /* &&
     msg.id.remote === "905494032745-1633642858@g.us"*/
   ) {
     var csvData = [];
@@ -60,6 +60,7 @@ client.on("message", async (msg) => {
         })
       )
       .on("data", function (csvrow) {
+        console.log(csvrow);
         csvData.push(csvrow[1]);
       })
       .on("end", function () {
