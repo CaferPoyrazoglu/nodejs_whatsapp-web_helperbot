@@ -1,8 +1,9 @@
 const SESSION_FILE_PATH = "./session.json";
 const qrcode = require("qrcode-terminal");
 const fs = require("fs");
-const { Client, MessageMedia } = require("whatsapp-web.js");
-
+const { Client } = require("whatsapp-web.js");
+const envfile = require("envfile");
+const sourcePath = ".env";
 const client = new Client({});
 
 client.on("authenticated", (session) => {
@@ -19,11 +20,27 @@ client.on("qr", (qr) => {
 });
 
 client.on("ready", () => {
-  console.log("Client is ready!");
+  //console.log("Client is ready!");
 });
 
 client.on("ready", () => {
-  console.log("READY");
+  console.log("Gruba katılım bekleniyor!");
+});
+
+function sleep(ms) {
+  return new Promise((resolve) => {
+    setTimeout(resolve, ms);
+  });
+}
+
+client.on("group_join", async (notification) => {
+  let parsedFile = envfile.parseFileSync(sourcePath);
+  parsedFile.GROUP = notification.id.remote;
+  fs.writeFileSync("./.env", envfile.stringifySync(parsedFile));
+
+  console.log("Grup bilgisi kaydedildi!");
+  console.log("Program 5 saniye sonra kapatılacak!");
+  await sleep(5000);
   process.exit(1);
 });
 

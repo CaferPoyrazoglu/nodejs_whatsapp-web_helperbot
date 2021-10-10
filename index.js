@@ -111,14 +111,14 @@ client.on("ready", async () => {
     .on("end", function () {
       //console.log(csvData);
       client.sendMessage(
-        process.env.GRUP,
+        process.env.GROUP,
         `*DÖNER FIRIN - 1*\r\nÜretilen Klinker Miktarı: ${csvData[1]} ton\r\n
 *DÖNER FIRIN - 2*\r\nÜretilen Klinker Miktarı: ${csvData[2]} ton\r\n\r\n
 *TOPLAM:* ${csvData[3]} ton\r\n`
       );
 
       client.sendMessage(
-        process.env.GRUP,
+        process.env.GROUP,
         `*ÇİMENTO DEĞİRMENİ - 1*\r\nÜretilen Çimento Miktarı: ${csvData[5]} ton\r\n
 *ÇİMENTO DEĞİRMENİ - 2*\r\nÜretilen Çimento Miktarı: ${csvData[6]} ton\r\n
 *ÇİMENTO DEĞİRMENİ - 3*\r\nÜretilen Çimento Miktarı: ${csvData[7]} ton\r\n
@@ -128,7 +128,7 @@ client.on("ready", async () => {
       );
 
       client.sendMessage(
-        process.env.GRUP,
+        process.env.GROUP,
         `*ÇİMENTO DEĞİRMENİ - 1*\r\nTüketilen Klinker Miktarı: ${csvData[12]} ton\r\n
 *ÇİMENTO DEĞİRMENİ - 2*\r\nTüketilen Klinker Miktarı: ${csvData[13]} ton\r\n
 *ÇİMENTO DEĞİRMENİ - 3*\r\nTüketilen Klinker Miktarı: ${csvData[14]} ton\r\n
