@@ -14,6 +14,8 @@ const client = new Client({
   session: sessionCfg,
 });
 
+client.initialize();
+
 client.on("authenticated", (session) => {
   sessionData = session;
   fs.writeFile(SESSION_FILE_PATH, JSON.stringify(session), (err) => {
@@ -30,69 +32,11 @@ client.on("qr", (qr) => {
 });
 
 client.on("ready", () => {
-  console.log("Sunucu Hazir!");
+  //console.log("Sunucu Hazir!");
 });
 
 client.on("auth_failure", (msg) => {
   console.error("Dogrulama Hatasi!", msg);
-});
-
-client.on("ready", () => {
-  console.log("Calisiyor!");
-});
-
-client.on("message", async (msg) => {
-  let chat = await msg.getChat();
-
-  if (
-    chat.isGroup &&
-    msg.body === "Rapor" /* &&
-    msg.id.remote === "905494032745-1633642858@g.us"*/
-  ) {
-    var csvData = [];
-    fs.createReadStream(process.env.KAYNAK)
-      .pipe(
-        parse({
-          relaxColumnCount: true,
-          skipEmptyLines: true,
-          skip_lines_with_empty_values: true,
-          skipLinesWithEmptyValues: true,
-        })
-      )
-      .on("data", function (csvrow) {
-        console.log(csvrow);
-        csvData.push(csvrow[1]);
-      })
-      .on("end", function () {
-        //console.log(csvData);
-        client.sendMessage(
-          msg.from,
-          `*DÖNER FIRIN - 1*\r\nÜretilen Klinker Miktarı: ${csvData[1]} ton\r\n
-*DÖNER FIRIN - 2*\r\nÜretilen Klinker Miktarı: ${csvData[2]} ton\r\n\r\n
-*TOPLAM:* ${csvData[3]} ton\r\n`
-        );
-
-        client.sendMessage(
-          msg.from,
-          `*ÇİMENTO DEĞİRMENİ - 1*\r\nÜretilen Çimento Miktarı: ${csvData[5]} ton\r\n
-*ÇİMENTO DEĞİRMENİ - 2*\r\nÜretilen Çimento Miktarı: ${csvData[6]} ton\r\n
-*ÇİMENTO DEĞİRMENİ - 3*\r\nÜretilen Çimento Miktarı: ${csvData[7]} ton\r\n
-*ÇİMENTO DEĞİRMENİ - 4*\r\nÜretilen Çimento Miktarı: ${csvData[8]} ton\r\n
-*ÇİMENTO DEĞİRMENİ - 5*\r\nÜretilen Çimento Miktarı: ${csvData[9]} ton\r\n\r\n
-*TOPLAM:* ${csvData[10]} ton\r\n`
-        );
-
-        client.sendMessage(
-          msg.from,
-          `*ÇİMENTO DEĞİRMENİ - 1*\r\nTüketilen Klinker Miktarı: ${csvData[12]} ton\r\n
-*ÇİMENTO DEĞİRMENİ - 2*\r\nTüketilen Klinker Miktarı: ${csvData[13]} ton\r\n
-*ÇİMENTO DEĞİRMENİ - 3*\r\nTüketilen Klinker Miktarı: ${csvData[14]} ton\r\n
-*ÇİMENTO DEĞİRMENİ - 4*\r\nTüketilen Klinker Miktarı: ${csvData[15]} ton\r\n
-*ÇİMENTO DEĞİRMENİ - 5*\r\nTüketilen Klinker Miktarı: ${csvData[16]} ton\r\n\r\n
-*TOPLAM:* ${csvData[17]} ton\r\n`
-        );
-      });
-  }
 });
 
 client.on("message_create", (msg) => {
@@ -141,4 +85,61 @@ client.on("disconnected", (reason) => {
   console.log("Cikis yapildi!", reason);
 });
 
-client.initialize();
+function sleep(ms) {
+  return new Promise((resolve) => {
+    setTimeout(resolve, ms);
+  });
+}
+
+client.on("ready", async () => {
+  console.log("Rapor 5 saniye sonra gruba iletilecek!");
+  await sleep(5000);
+
+  var csvData = [];
+  fs.createReadStream(process.env.KAYNAK)
+    .pipe(
+      parse({
+        relaxColumnCount: true,
+        skipEmptyLines: true,
+        skip_lines_with_empty_values: true,
+        skipLinesWithEmptyValues: true,
+      })
+    )
+    .on("data", function (csvrow) {
+      csvData.push(csvrow[1]);
+    })
+    .on("end", function () {
+      //console.log(csvData);
+      client.sendMessage(
+        process.env.GRUP,
+        `*DÖNER FIRIN - 1*\r\nÜretilen Klinker Miktarı: ${csvData[1]} ton\r\n
+*DÖNER FIRIN - 2*\r\nÜretilen Klinker Miktarı: ${csvData[2]} ton\r\n\r\n
+*TOPLAM:* ${csvData[3]} ton\r\n`
+      );
+
+      client.sendMessage(
+        process.env.GRUP,
+        `*ÇİMENTO DEĞİRMENİ - 1*\r\nÜretilen Çimento Miktarı: ${csvData[5]} ton\r\n
+*ÇİMENTO DEĞİRMENİ - 2*\r\nÜretilen Çimento Miktarı: ${csvData[6]} ton\r\n
+*ÇİMENTO DEĞİRMENİ - 3*\r\nÜretilen Çimento Miktarı: ${csvData[7]} ton\r\n
+*ÇİMENTO DEĞİRMENİ - 4*\r\nÜretilen Çimento Miktarı: ${csvData[8]} ton\r\n
+*ÇİMENTO DEĞİRMENİ - 5*\r\nÜretilen Çimento Miktarı: ${csvData[9]} ton\r\n\r\n
+*TOPLAM:* ${csvData[10]} ton\r\n`
+      );
+
+      client.sendMessage(
+        process.env.GRUP,
+        `*ÇİMENTO DEĞİRMENİ - 1*\r\nTüketilen Klinker Miktarı: ${csvData[12]} ton\r\n
+*ÇİMENTO DEĞİRMENİ - 2*\r\nTüketilen Klinker Miktarı: ${csvData[13]} ton\r\n
+*ÇİMENTO DEĞİRMENİ - 3*\r\nTüketilen Klinker Miktarı: ${csvData[14]} ton\r\n
+*ÇİMENTO DEĞİRMENİ - 4*\r\nTüketilen Klinker Miktarı: ${csvData[15]} ton\r\n
+*ÇİMENTO DEĞİRMENİ - 5*\r\nTüketilen Klinker Miktarı: ${csvData[16]} ton\r\n\r\n
+*TOPLAM:* ${csvData[17]} ton\r\n`
+      );
+    });
+  console.log("İletildi!");
+  await sleep(1000);
+  console.log("Program 5 saniye sonra kapatılacak!");
+  await sleep(5000);
+  process.exit(1);
+});
